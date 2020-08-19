@@ -311,7 +311,14 @@ def deps(
         print("calling go mod vendor")
         start = datetime.datetime.now()
         verbosity = ' -v' if verbose else ''
-        ctx.run("go mod vendor{}".format(verbosity))
+
+        env = {}
+
+        if sys.platform != 'win32':
+            env['GOPROXY'] = "https://goproxy.io,direct"
+
+        ctx.run("go mod vendor{}".format(verbosity), env=env)
+
         # use modvendor to copy missing files dependencies
         ctx.run('{}/bin/modvendor -copy="**/*.c **/*.h **/*.proto"{}'.format(get_gopath(ctx), verbosity))
         dep_done = datetime.datetime.now()
